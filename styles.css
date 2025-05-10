@@ -1,0 +1,384 @@
+/* Variables globales */
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --income-color: #10b981;
+    --expense-color: #ef4444;
+    --light-bg: #f9fafb;
+    --dark-text: #1f2937;
+    --medium-text: #4b5563;
+    --light-text: #9ca3af;
+    --border-color: #e5e7eb;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --card-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* Reset y estilos generales */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f3f4f6;
+    color: var(--dark-text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    gap: 30px;
+}
+
+/* Header */
+.app-header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.logo i {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.logo h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-text);
+}
+
+.tagline {
+    color: var(--medium-text);
+    font-size: 1rem;
+}
+
+/* Layout principal */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .main-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard {
+        grid-column: span 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-content {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .form-section {
+        grid-column: span 1;
+    }
+    
+    .operations-section, .results-section {
+        grid-column: span 1;
+    }
+}
+
+/* Card */
+.card {
+    background-color: white;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    height: 100%;
+}
+
+.card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card h2 i {
+    color: var(--primary-color);
+}
+
+/* Balance Card */
+.balance-card {
+    background: linear-gradient(to right, var(--primary-color), #818cf8);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.balance-card h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.balance-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.stat-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.income .stat-label i {
+    color: #a7f3d0;
+}
+
+.expenses .stat-label i {
+    color: #fecaca;
+}
+
+.total-movements {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 10px;
+}
+
+/* Formulario */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--medium-text);
+    font-size: 0.9rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Input con icono */
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--medium-text);
+}
+
+.input-with-icon input {
+    padding-left: 35px;
+}
+
+/* Radio buttons personalizados */
+.radio-group {
+    display: flex;
+    gap: 10px;
+}
+
+.radio-container {
+    position: relative;
+    flex: 1;
+    cursor: pointer;
+}
+
+.radio-container input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.radio-custom.ingreso {
+    color: var(--income-color);
+}
+
+.radio-custom.egreso {
+    color: var(--expense-color);
+}
+
+.radio-container input:checked + .radio-custom.ingreso {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: var(--income-color);
+}
+
+.radio-container input:checked + .radio-custom.egreso {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--expense-color);
+}
+
+/* Botones */
+button {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-operation {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    color: var(--dark-text);
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.btn-operation:hover:not(:disabled) {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button i {
+    font-size: 0.95rem;
+}
+
+/* Sección de resultados */
+.result-content {
+    min-height: 100px;
+}
+
+.empty-message {
+    color: var(--light-text);
+    text-align: center;
+    margin-top: 30px;
+}
+
+/* Listas de resultados */
+#resultadoOperaciones ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#resultadoOperaciones li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#resultadoOperaciones li:last-child {
+    border-bottom: none;
+}
+
+/* Footer */
+.app-footer {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    color: var(--medium-text);
+    font-size: 0.9rem;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 480px) {
+    .app-container {
+        padding: 15px;
+    }
+    
+    .balance-amount {
+        font-size: 2rem;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+    }
+}

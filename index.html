@@ -3,103 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Control de Presupuesto</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input, select, button {
-            padding: 8px;
-            width: 100%;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        #resumen, #resultadoOperaciones {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-    </style>
+    <title>Personal Budget - Control de Finanzas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Sistema de Control de Presupuesto</h1>
-        
-        <div>
-            <h2>Registrar Movimiento</h2>
-            <form id="formulario">
-                <div class="form-group">
-                    <label for="nombre">Nombre del movimiento:</label>
-                    <input type="text" id="nombre" required>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-wallet"></i>
+                <h1>Personal Budget</h1>
+            </div>
+            <p class="tagline">Controla tus finanzas de manera simple</p>
+        </header>
+
+        <main class="main-content">
+            <section class="dashboard">
+                <div class="balance-card">
+                    <h2>Tu Balance</h2>
+                    <div class="balance-amount" id="saldoTotal">$0.00</div>
+                    <div class="balance-stats">
+                        <div class="stat income">
+                            <span class="stat-label"><i class="fas fa-arrow-up"></i> Ingresos</span>
+                            <span class="stat-value" id="totalIngresos">$0.00</span>
+                        </div>
+                        <div class="stat expenses">
+                            <span class="stat-label"><i class="fas fa-arrow-down"></i> Egresos</span>
+                            <span class="stat-value" id="totalEgresos">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="total-movements">
+                        Total de movimientos: <span id="totalMovimientos">0</span>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="tipo">Tipo:</label>
-                    <select id="tipo">
-                        <option value="ingreso">Ingreso</option>
-                        <option value="egreso">Egreso</option>
-                    </select>
+            </section>
+
+            <section class="form-section">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Nuevo Movimiento</h2>
+                    <form id="formulario">
+                        <div class="form-group">
+                            <label for="nombre">Descripción</label>
+                            <input type="text" id="nombre" placeholder="Ej: Salario, Compra supermercado" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tipo">Tipo</label>
+                            <div class="radio-group">
+                                <label class="radio-container">
+                                    <input type="radio" name="tipo" value="ingreso" id="tipo-ingreso" checked>
+                                    <span class="radio-custom ingreso">
+                                        <i class="fas fa-arrow-up"></i> Ingreso
+                                    </span>
+                                </label>
+                                <label class="radio-container">
+                                    <input type="radio" name="tipo" value="egreso" id="tipo-egreso">
+                                    <span class="radio-custom egreso">
+                                        <i class="fas fa-arrow-down"></i> Egreso
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="monto">Monto ($)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="monto" min="0.01" step="0.01" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="btnRegistrar" class="btn-primary">
+                            <i class="fas fa-save"></i> Registrar Movimiento
+                        </button>
+                    </form>
                 </div>
-                
-                <div class="form-group">
-                    <label for="monto">Monto:</label>
-                    <input type="number" id="monto" min="0.01" step="0.01" required>
+            </section>
+
+            <section class="operations-section">
+                <div class="card">
+                    <h2><i class="fas fa-search"></i> Operaciones</h2>
+                    <div class="buttons-container">
+                        <button id="btnListarNombres" class="btn-operation" disabled>
+                            <i class="fas fa-list"></i> Listar Nombres (map)
+                        </button>
+                        <button id="btnFiltrarEgresos" class="btn-operation" disabled>
+                            <i class="fas fa-filter"></i> Filtrar Egresos > $100 (filter)
+                        </button>
+                        <button id="btnBuscarMovimiento" class="btn-operation" disabled>
+                            <i class="fas fa-search"></i> Buscar por Nombre (find)
+                        </button>
+                    </div>
                 </div>
-                
-                <button type="button" id="btnRegistrar">Registrar</button>
-            </form>
-        </div>
-        
-        <div id="resumen">
-            <h3>Resumen</h3>
-            <p>Total de movimientos: 0</p>
-            <p>Saldo total: $0.00</p>
-        </div>
-        
-        <div class="buttons-container">
-            <h3>Operaciones Funcionales</h3>
-            <button id="btnListarNombres">Listar Nombres (map)</button>
-            <button id="btnFiltrarEgresos">Filtrar Egresos > $100 (filter)</button>
-            <button id="btnBuscarMovimiento">Buscar por Nombre (find)</button>
-        </div>
-        
-        <div id="resultadoOperaciones">
-            <h3>Resultados</h3>
-            <p>Aquí se mostrarán los resultados de las operaciones funcionales.</p>
-        </div>
+            </section>
+
+            <section class="results-section">
+                <div class="card" id="resultadoOperaciones">
+                    <h2><i class="fas fa-clipboard-list"></i> Resultados</h2>
+                    <div class="result-content">
+                        <p class="empty-message">Los resultados de las operaciones se mostrarán aquí.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2025 Personal Budget App | Creado con HTML, CSS y JavaScript</p>
+        </footer>
     </div>
 
     <!-- Vinculación con el archivo JavaScript -->
