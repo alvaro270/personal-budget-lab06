@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control de Presupuesto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, button {
+            padding: 8px;
+            width: 100%;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #resumen, #resultadoOperaciones {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistema de Control de Presupuesto</h1>
+        
+        <div>
+            <h2>Registrar Movimiento</h2>
+            <form id="formulario">
+                <div class="form-group">
+                    <label for="nombre">Nombre del movimiento:</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo">
+                        <option value="ingreso">Ingreso</option>
+                        <option value="egreso">Egreso</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="monto">Monto:</label>
+                    <input type="number" id="monto" min="0.01" step="0.01" required>
+                </div>
+                
+                <button type="button" id="btnRegistrar">Registrar</button>
+            </form>
+        </div>
+        
+        <div id="resumen">
+            <h3>Resumen</h3>
+            <p>Total de movimientos: 0</p>
+            <p>Saldo total: $0.00</p>
+        </div>
+        
+        <div class="buttons-container">
+            <h3>Operaciones Funcionales</h3>
+            <button id="btnListarNombres">Listar Nombres (map)</button>
+            <button id="btnFiltrarEgresos">Filtrar Egresos > $100 (filter)</button>
+            <button id="btnBuscarMovimiento">Buscar por Nombre (find)</button>
+        </div>
+        
+        <div id="resultadoOperaciones">
+            <h3>Resultados</h3>
+            <p>Aquí se mostrarán los resultados de las operaciones funcionales.</p>
+        </div>
+    </div>
+
+    <!-- Vinculación con el archivo JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
