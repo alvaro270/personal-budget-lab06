@@ -147,6 +147,8 @@ function registrarMovimiento() {
     document.getElementById("btnListarNombres").disabled = false;
     document.getElementById("btnFiltrarEgresos").disabled = false;
     document.getElementById("btnBuscarMovimiento").disabled = false;
+    document.getElementById("btnSumarizarPorTipo").disabled = false;
+    document.getElementById("btnBuscarPorRango").disabled = false;
 
     // Mostrar mensaje de éxito
     mostrarAlerta(
@@ -477,26 +479,214 @@ function buscarMovimientoPorNombre() {
   });
 }
 
-// Configuración inicial de la página
+// HU4 - Sumarizar Movimientos por Tipo
+function sumarizarMovimientosPorTipo() {
+  // Verificar que haya movimientos
+  if (movimientos.length === 0) {
+    mostrarAlerta("No hay movimientos registrados.", "error");
+    return;
+  }
+
+  // Contar movimientos por tipo
+  let contadorIngresos = 0;
+  let contadorEgresos = 0;
+
+  // Usar forEach para contar
+  movimientos.forEach(movimiento => {
+    if (movimiento.tipo === "ingreso") {
+      contadorIngresos++;
+    } else {
+      contadorEgresos++;
+    }
+  });
+
+  // Calcular totales y porcentajes
+  const totalMovimientos = movimientos.length;
+  const porcentajeIngresos = (contadorIngresos / totalMovimientos) * 100;
+  const porcentajeEgresos = (contadorEgresos / totalMovimientos) * 100;
+
+  // Mostrar resultados en la UI
+  const resultadoDiv = document.getElementById("resultadoOperaciones");
+  let contenidoHTML = `
+    <h2><i class="fas fa-clipboard-list"></i> Resultados</h2>
+    <div class="result-content">
+      <h3>Resumen por Tipo de Movimiento</h3>
+      <div class="type-summary">
+        <div class="summary-card ingresos">
+          <div class="summary-label">Total Ingresos</div>
+          <div class="summary-count ingresos">${contadorIngresos}</div>
+          <div class="summary-percentage ingresos">${porcentajeIngresos.toFixed(1)}%</div>
+        </div>
+        <div class="summary-card egresos">
+          <div class="summary-label">Total Egresos</div>
+          <div class="summary-count egresos">${contadorEgresos}</div>
+          <div class="summary-percentage egresos">${porcentajeEgresos.toFixed(1)}%</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  resultadoDiv.innerHTML = contenidoHTML;
+
+  // Mostrar en consola para depuración
+  console.log("Resumen por tipo:", { 
+    ingresos: contadorIngresos, 
+    egresos: contadorEgresos,
+    porcentajeIngresos: porcentajeIngresos.toFixed(1) + "%",
+    porcentajeEgresos: porcentajeEgresos.toFixed(1) + "%"
+  });
+}
+
+// HU5 - Buscar Movimientos por Rango de Montos
+function buscarMovimientosPorRango() {
+  // Verificar que haya movimientos
+  if (movimientos.length === 0) {
+    mostrarAlerta("No hay movimientos registrados.", "error");
+    return;
+  }
+
+  // Crear un diálogo personalizado para la búsqueda por rango
+  const dialogHTML = `
+    <div class="range-dialog" id="rangeDialog">
+      <div class="range-dialog-content">
+        <h3>Buscar por Rango de Montos</h3>
+        <div class="range-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="minAmount">Monto Mínimo ($)</label>
+              <div class="input-with-icon">
+                <i class="fas fa-dollar-sign"></i>
+                <input type="number" id="minAmount" min="0" step="0.01" placeholder="0.00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="maxAmount">Monto Máximo ($)</label>
+              <div class="input-with-icon">
+                <i class="fas fa-dollar-sign"></i>
+                <input type="number" id="maxAmount" min="0" step="0.01" placeholder="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="range-buttons">
+            <button id="cancelRange" class="btn-secondary">Cancelar</button>
+            <button id="confirmRange" class="btn-primary">Buscar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Insertar el diálogo en el DOM
+  document.body.insertAdjacentHTML("beforeend", dialogHTML);
+
+  // Obtener referencias a los elementos del diálogo
+  const dialog = document.getElementById("rangeDialog");
+  const minInput = document.getElementById("minAmount");
+  const maxInput = document.getElementById("maxAmount");
+  const cancelButton = document.getElementById("cancelRange");
+  const confirmButton = document.getElementById("confirmRange");
+
+  // Enfocar el input de monto mínimo
+  minInput.focus();
+
+  // Función para ejecutar la búsqueda por rango
+  function realizarBusquedaPorRango() {
+    // Obtener valores y convertirlos a números
+    const minAmount = parseFloat(minInput.value) || 0;
+    const maxAmount = parseFloat(maxInput.value) || Infinity;
+
+    // Validar que el rango sea coherente
+    if (minAmount > maxAmount) {
+      mostrarAlerta("El monto mínimo no puede ser mayor al máximo.", "error");
+      return;
+    }
+
+    // Cerrar el diálogo
+    dialog.remove();
+
+    // Usar filter() para encontrar movimientos en el rango especificado
+    const movimientosFiltrados = movimientos.filter(movimiento => 
+      movimiento.monto >= minAmount && movimiento.monto <= maxAmount
+    );
+
+    // Mostrar resultados en la UI
+    const resultadoDiv = document.getElementById("resultadoOperaciones");
+    let contenidoHTML = `
+      <h2><i class="fas fa-clipboard-list"></i> Resultados</h2>
+      <div class="result-content">
+        <div class="range-results-header">
+          <h3>Movimientos entre <span class="movement-amount-range">${formatearMonto(minAmount)}</span> y <span class="movement-amount-range">${maxAmount === Infinity ? 'cualquier monto' : formatearMonto(maxAmount)}</span></h3>
+          <span class="range-results-count">${movimientosFiltrados.length} resultados</span>
+        </div>
+    `;
+
+    if (movimientosFiltrados.length === 0) {
+      contenidoHTML += `
+        <div class="not-found">
+          <i class="fas fa-search"></i>
+          <p>No se encontraron movimientos en el rango especificado.</p>
+        </div>
+      `;
+    } else {
+      contenidoHTML += `<ul class="movement-list">`;
+      movimientosFiltrados.forEach(movimiento => {
+        const tipoClase = movimiento.tipo === "ingreso" ? "ingreso" : "egreso";
+        contenidoHTML += `
+          <li>
+            <div>
+              <strong>${movimiento.nombre}</strong>
+              <span class="movement-header ${tipoClase}" style="margin-left: 10px;">
+                ${movimiento.tipo}
+              </span>
+            </div>
+            <span class="movimiento-monto ${tipoClase}">${movimiento.formatearMonto()}</span>
+          </li>
+        `;
+      });
+      contenidoHTML += `</ul>`;
+    }
+
+    contenidoHTML += `</div>`;
+    resultadoDiv.innerHTML = contenidoHTML;
+
+    // Mostrar en consola para depuración
+    console.log("Búsqueda por rango:", { 
+      min: minAmount, 
+      max: maxAmount, 
+      resultados: movimientosFiltrados.length 
+    });
+  }
+
+  // Event listeners para los botones
+  confirmButton.addEventListener("click", realizarBusquedaPorRango);
+  cancelButton.addEventListener("click", () => dialog.remove());
+
+  // También permitir la búsqueda con Enter
+  maxInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      realizarBusquedaPorRango();
+    }
+  });
+}
+
+// Modificar la función inicializar para incluir los nuevos botones
 function inicializar() {
   // Desactivar botones hasta que haya movimientos
   document.getElementById("btnListarNombres").disabled = true;
   document.getElementById("btnFiltrarEgresos").disabled = true;
   document.getElementById("btnBuscarMovimiento").disabled = true;
+  document.getElementById("btnSumarizarPorTipo").disabled = true;
+  document.getElementById("btnBuscarPorRango").disabled = true;
 
   // Configurar eventos de botones
-  document
-    .getElementById("btnRegistrar")
-    .addEventListener("click", registrarMovimiento);
-  document
-    .getElementById("btnListarNombres")
-    .addEventListener("click", listarNombresMovimientos);
-  document
-    .getElementById("btnFiltrarEgresos")
-    .addEventListener("click", filtrarEgresosMayores100);
-  document
-    .getElementById("btnBuscarMovimiento")
-    .addEventListener("click", buscarMovimientoPorNombre);
+  document.getElementById("btnRegistrar").addEventListener("click", registrarMovimiento);
+  document.getElementById("btnListarNombres").addEventListener("click", listarNombresMovimientos);
+  document.getElementById("btnFiltrarEgresos").addEventListener("click", filtrarEgresosMayores100);
+  document.getElementById("btnBuscarMovimiento").addEventListener("click", buscarMovimientoPorNombre);
+  
+  // Nuevos botones para HU4 y HU5
+  document.getElementById("btnSumarizarPorTipo").addEventListener("click", sumarizarMovimientosPorTipo);
+  document.getElementById("btnBuscarPorRango").addEventListener("click", buscarMovimientosPorRango);
 
   // Permitir enviar el formulario con Enter
   document.getElementById("monto").addEventListener("keypress", (e) => {
