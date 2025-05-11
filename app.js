@@ -1,56 +1,246 @@
-// Variables globales
-let movimientos = []; // Array para guardar los movimientos
-
-// Función para registrar un nuevo movimiento
-function registrarMovimiento() {
-    // Obtener valores del formulario
-    const nombre = document.getElementById('nombre').value;
-    const monto = parseFloat(document.getElementById('monto').value);
-    
-    // Determinar el tipo seleccionado (usando radio buttons)
-    const tipoIngreso = document.getElementById('tipo-ingreso');
-    const tipo = tipoIngreso.checked ? 'ingreso' : 'egreso';
-    
-    // Validar los datos básicos
+// Función constructora para Movimiento
+function Movimiento(nombre, tipo, monto) {
+    // Validación básica de datos
     if (nombre.trim() === "") {
-        mostrarAlerta("El nombre no puede estar vacío.", "error");
-        return;
+        throw new Error("El nombre no puede estar vacío.");
     }
     
     if (isNaN(monto) || monto <= 0) {
-        mostrarAlerta("El monto debe ser un número mayor a cero.", "error");
-        return;
+        throw new Error("El monto debe ser un número mayor a cero.");
     }
     
-    // Crear un objeto para el movimiento
-    const movimiento = {
-        nombre: nombre,
-        tipo: tipo,
-        monto: monto,
-        fecha: new Date() // Añadir fecha y hora del registro
-    };
+    if (tipo !== "ingreso" && tipo !== "egreso") {
+        throw new Error("El tipo debe ser 'ingreso' o 'egreso'.");
+    }
     
-    // Agregar el movimiento al array
-    movimientos.push(movimiento);
+    // Propiedades del objeto
+    this.nombre = nombre;
+    this.tipo = tipo;
+    this.monto = monto;
+    this.fecha = new Date(); // Añadir fecha y hora del registro
+}
+
+// Método para formatear el monto
+Movimiento.prototype.formatearMonto = function() {
+    return `$${this.monto.toFixed(2)}`;
+};
+
+// Método para renderizar el movimiento en el DOM - HU3
+Movimiento.prototype.render = function() {
+    // Crear elemento contenedor
+    const movimientoItem = document.createElement('div');
+    movimientoItem.className = `movimiento-item ${this.tipo}`;
     
-    // Limpiar el formulario
-    document.getElementById('nombre').value = "";
-    document.getElementById('monto').value = "";
-    document.getElementById('tipo-ingreso').checked = true;
+    // Formatear fecha
+    const fecha = this.fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     
-    // Actualizar el resumen
-    mostrarResumen();
+    // Crear contenido HTML
+    movimientoItem.innerHTML = `
+        <div class="movimiento-info">
+            <div class="movimiento-nombre">${this.nombre}</div>
+            <div class="movimiento-fecha">${fecha}</div>
+        </div>
+        <div class="movimiento-monto ${this.tipo}">${this.formatearMonto()}</div>
+    `;
     
-    // Habilitar los botones de funciones ahora que hay datos
-    document.getElementById('btnListarNombres').disabled = false;
-    document.getElementById('btnFiltrarEgresos').disabled = false;
-    document.getElementById('btnBuscarMovimiento').disabled = false;
+    return movimientoItem;
+};
+
+// Variables globales
+let movimientos = []; // Array para guardar los movimientos (ahora son objetos)
+
+// Función para registrar un nuevo movimiento
+function registrarMovimiento() {
+    try {
+        // Obtener valores del formulario
+        const nombre = document.getElementById('nombre').value;
+        const monto = parseFloat(document.getElementById('monto').value);
+        
+        // Determinar el tipo seleccionado (usando radio buttons)
+        const tipoIngreso = document.getElementById('tipo-ingreso');
+        const tipo = tipoIngreso.checked ? 'ingreso' : 'egreso';
+        
+        // Crear un nuevo objeto Movimiento usando la función constructora
+        const movimiento = new Movimiento(nombre, tipo, monto);
+        
+        // Agregar el movimiento al array
+        movimientos.push(movimiento);
+        
+        // Limpiar el formulario
+        document.getElementById('nombre').value = "";
+        document.getElementById('monto').value = "";
+        document.getElementById('tipo-ingreso').checked = true;
+        
+        // Actualizar el resumen
+        mostrarResumen();
+        
+        // Habilitar los botones de funciones ahora que hay datos
+        document.getElementById('btnListarNombres').disabled = false;
+        document.getElementById('btnFiltrarEgresos').disabled = false;
+        document.getElementById('btnBuscarMovimiento').disabled = false;
+        
+        // Mostrar mensaje de éxito
+        mostrarAlerta(`Movimiento "${nombre}" registrado correctamente.`, "success");
+        
+        // Renderizar el movimiento en el DOM - Nueva funcionalidad de HU3
+        mostrarUltimoMovimiento(movimiento);
+        
+        // Enfocar el campo nombre para el siguiente registro
+        document.getElementById('nombre').focus();
+    } catch (error) {
+        // Capturar los errores lanzados por el constructor y mostrar alerta
+        mostrarAlerta(error.message, "error");
+    }
+}
+
+// Función para mostrar el último movimiento añadido
+function mostrarUltimoMovimiento(movimiento) {
+    // Verificar si existe la sección de movimientos recientes
+    let seccionMovimientos = document.querySelector('.movimientos-recientes');
     
-    // Mostrar mensaje de éxito
-    mostrarAlerta(`Movimiento "${nombre}" registrado correctamente.`, "success");
+    // Si no existe, crearla
+    if (!seccionMovimientos) {
+        seccionMovimientos = document.createElement('section');
+        seccionMovimientos.className = 'movimientos-recientes';
+        
+        // Crear título
+        const titulo = document.createElement('h2');
+        titulo.innerHTML = '<i class="fas fa-receipt"></i> Movimientos Recientes';
+        
+        // Crear contenedor para los items
+        const contenedor = document.createElement('div');
+        contenedor.className = 'movimientos-lista';
+        
+        // Agregar elementos a la sección
+        seccionMovimientos.appendChild(titulo);
+        seccionMovimientos.appendChild(contenedor);
+        
+        // Insertar en el DOM después del dashboard
+        document.querySelector('.dashboard').after(seccionMovimientos);
+        
+        // Aplicar estilos
+        aplicarEstilosMovimientosRecientes();
+    }
     
-    // Enfocar el campo nombre para el siguiente registro
-    document.getElementById('nombre').focus();
+    // Obtener el contenedor de movimientos
+    const contenedorMovimientos = seccionMovimientos.querySelector('.movimientos-lista');
+    
+    // Usar el método render del prototipo para obtener el elemento HTML
+    const movimientoElement = movimiento.render();
+    
+    // Insertar al inicio de la lista
+    if (contenedorMovimientos.firstChild) {
+        contenedorMovimientos.insertBefore(movimientoElement, contenedorMovimientos.firstChild);
+    } else {
+        contenedorMovimientos.appendChild(movimientoElement);
+    }
+    
+    // Limitar a mostrar los 5 movimientos más recientes
+    if (contenedorMovimientos.children.length > 5) {
+        contenedorMovimientos.removeChild(contenedorMovimientos.lastChild);
+    }
+}
+
+// Aplicar estilos a la sección de movimientos recientes
+function aplicarEstilosMovimientosRecientes() {
+    const estilos = `
+        .movimientos-recientes {
+            background-color: white;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-top: 20px;
+            grid-column: span 2;
+        }
+        
+        .movimientos-recientes h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .movimientos-recientes h2 i {
+            color: var(--primary-color);
+        }
+        
+        .movimientos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .movimiento-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .movimiento-item.ingreso {
+            border-left-color: var(--income-color);
+        }
+        
+        .movimiento-item.egreso {
+            border-left-color: var(--expense-color);
+        }
+        
+        .movimiento-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .movimiento-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .movimiento-nombre {
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+        
+        .movimiento-fecha {
+            font-size: 0.85rem;
+            color: var(--medium-text);
+        }
+        
+        .movimiento-monto {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .movimiento-monto.ingreso {
+            color: var(--income-color);
+        }
+        
+        .movimiento-monto.egreso {
+            color: var(--expense-color);
+        }
+        
+        @media (max-width: 768px) {
+            .movimientos-recientes {
+                grid-column: span 1;
+            }
+        }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = estilos;
+    document.head.appendChild(styleElement);
 }
 
 // Función para mostrar alertas temporales
@@ -106,7 +296,7 @@ function mostrarResumen() {
     let totalIngresos = 0;
     let totalEgresos = 0;
     
-    // Usar un forEach para calcular totales
+    // Usar un forEach para calcular totales con los objetos Movimiento
     movimientos.forEach(movimiento => {
         if (movimiento.tipo === "ingreso") {
             saldoTotal += movimiento.monto;
@@ -132,7 +322,7 @@ function mostrarResumen() {
     }
 }
 
-// Formatear cantidades monetarias
+// Formatear cantidades monetarias (función global)
 function formatearMonto(valor) {
     return `$${valor.toFixed(2)}`;
 }
@@ -145,7 +335,7 @@ function listarNombresMovimientos() {
         return [];
     }
     
-    // Usar map() para obtener solo los nombres
+    // Usar map() para obtener solo los nombres de los objetos Movimiento
     const nombres = movimientos.map(movimiento => movimiento.nombre);
     
     // Mostrar resultados en la UI
@@ -203,7 +393,7 @@ function filtrarEgresosMayores100() {
             contenidoHTML += `
                 <li>
                     <strong>${movimiento.nombre}</strong> - 
-                    <span class="monto-egreso">${formatearMonto(movimiento.monto)}</span>
+                    <span class="monto-egreso">${movimiento.formatearMonto()}</span>
                 </li>
             `;
         });
@@ -368,7 +558,7 @@ function buscarMovimientoPorNombre() {
                     </div>
                     <h4>${movimientoEncontrado.nombre}</h4>
                     <div class="movement-info">
-                        <span class="monto ${tipoClase}">${formatearMonto(movimientoEncontrado.monto)}</span>
+                        <span class="monto ${tipoClase}">${movimientoEncontrado.formatearMonto()}</span>
                     </div>
                 </div>
             `;
