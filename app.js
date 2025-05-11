@@ -1,6 +1,6 @@
-// Función constructora para Movimiento
-function Movimiento(nombre, tipo, monto) {
-    // Validación básica de datos
+// Función constructora base para Movimiento
+function Movimiento(nombre, monto) {
+    // Validación básica de datos comunes
     if (nombre.trim() === "") {
         throw new Error("El nombre no puede estar vacío.");
     }
@@ -9,23 +9,18 @@ function Movimiento(nombre, tipo, monto) {
         throw new Error("El monto debe ser un número mayor a cero.");
     }
     
-    if (tipo !== "ingreso" && tipo !== "egreso") {
-        throw new Error("El tipo debe ser 'ingreso' o 'egreso'.");
-    }
-    
-    // Propiedades del objeto
+    // Propiedades comunes
     this.nombre = nombre;
-    this.tipo = tipo;
     this.monto = monto;
     this.fecha = new Date(); // Añadir fecha y hora del registro
 }
 
-// Método para formatear el monto
+// Métodos comunes en el prototipo de Movimiento
 Movimiento.prototype.formatearMonto = function() {
     return `$${this.monto.toFixed(2)}`;
 };
 
-// Método para renderizar el movimiento en el DOM - HU3
+// Método para renderizar el movimiento en el DOM
 Movimiento.prototype.render = function() {
     // Crear elemento contenedor
     const movimientoItem = document.createElement('div');
@@ -52,8 +47,66 @@ Movimiento.prototype.render = function() {
     return movimientoItem;
 };
 
+// Función constructora para Ingreso (hereda de Movimiento)
+function Ingreso(nombre, monto) {
+    // Llamar al constructor padre con this
+    Movimiento.call(this, nombre, monto);
+    
+    // Propiedad específica de Ingreso
+    this.tipo = "ingreso";
+}
+
+// Establecer la herencia prototipal
+Ingreso.prototype = Object.create(Movimiento.prototype);
+Ingreso.prototype.constructor = Ingreso;
+
+// Métodos específicos para Ingreso
+Ingreso.prototype.validarIngreso = function() {
+    // Validaciones específicas para ingresos
+    // Por ejemplo, podríamos validar categorías de ingresos en el futuro
+    return true;
+};
+
+// Función constructora para Egreso (hereda de Movimiento)
+function Egreso(nombre, monto) {
+    // Llamar al constructor padre con this
+    Movimiento.call(this, nombre, monto);
+    
+    // Propiedad específica de Egreso
+    this.tipo = "egreso";
+}
+
+// Establecer la herencia prototipal
+Egreso.prototype = Object.create(Movimiento.prototype);
+Egreso.prototype.constructor = Egreso;
+
+// Métodos específicos para Egreso
+Egreso.prototype.validarEgreso = function() {
+    // Validaciones específicas para egresos
+    // Por ejemplo, comprobar si hay suficiente saldo
+    const saldoActual = calcularSaldoActual();
+    if (saldoActual < this.monto) {
+        console.warn("⚠️ Advertencia: Este egreso supera tu saldo actual.");
+        // Podríamos lanzar un error o simplemente advertir al usuario
+    }
+    return true;
+};
+
 // Variables globales
 let movimientos = []; // Array para guardar los movimientos (ahora son objetos)
+
+// Función para calcular el saldo actual (utilizada en validarEgreso)
+function calcularSaldoActual() {
+    let saldo = 0;
+    movimientos.forEach(movimiento => {
+        if (movimiento.tipo === "ingreso") {
+            saldo += movimiento.monto;
+        } else {
+            saldo -= movimiento.monto;
+        }
+    });
+    return saldo;
+}
 
 // Función para registrar un nuevo movimiento
 function registrarMovimiento() {
@@ -66,8 +119,16 @@ function registrarMovimiento() {
         const tipoIngreso = document.getElementById('tipo-ingreso');
         const tipo = tipoIngreso.checked ? 'ingreso' : 'egreso';
         
-        // Crear un nuevo objeto Movimiento usando la función constructora
-        const movimiento = new Movimiento(nombre, tipo, monto);
+        // Crear el objeto apropiado según el tipo (usando herencia)
+        let movimiento;
+        
+        if (tipo === 'ingreso') {
+            movimiento = new Ingreso(nombre, monto);
+            movimiento.validarIngreso(); // Validaciones específicas
+        } else {
+            movimiento = new Egreso(nombre, monto);
+            movimiento.validarEgreso(); // Validaciones específicas
+        }
         
         // Agregar el movimiento al array
         movimientos.push(movimiento);
@@ -88,7 +149,7 @@ function registrarMovimiento() {
         // Mostrar mensaje de éxito
         mostrarAlerta(`Movimiento "${nombre}" registrado correctamente.`, "success");
         
-        // Renderizar el movimiento en el DOM - Nueva funcionalidad de HU3
+        // Renderizar el movimiento en el DOM
         mostrarUltimoMovimiento(movimiento);
         
         // Enfocar el campo nombre para el siguiente registro
@@ -288,7 +349,7 @@ function mostrarAlerta(mensaje, tipo) {
     }, 3000);
 }
 
-// Función para mostrar el resumen
+// Método para mostrar el resumen - ahora aprovecha la herencia prototipal
 function mostrarResumen() {
     // Variables para el resumen
     let totalMovimientos = movimientos.length;
